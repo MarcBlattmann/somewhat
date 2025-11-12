@@ -1,0 +1,36 @@
+# --- Python cache ---
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.py.class
+
+# --- Virtual environments ---
+.venv/
+env/
+venv/
+
+# --- IDE / Editor ---
+.vscode/
+.idea/
+*.iml
+
+# --- OS files ---
+.DS_Store
+Thumbs.db
+
+# --- Logs & temporary files ---
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+
+# --- Build & packaging ---
+build/
+dist/
+*.egg-info/
+
+# --- Ignore all CSV and Parquet files everywhere ---
+*.csv
+*.parquet
