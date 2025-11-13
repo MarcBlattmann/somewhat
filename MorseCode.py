@@ -130,7 +130,7 @@ EMOJI_TO_REFERENCE: Dict[str, str] = {
     "⚡": "HIGH_VOLTAGE",
     "💧": "WATER_DROPLET",
 }
-REFERENCE_TO_EMOJI: Dict[str, str] = {v: k for k, v in EMOJI_TO_REFERENCE.items()}
+REFERENCE_TO_EMOJI: Dict[str, str] = {v: k for k, v in EMOJI_TO_REFERENCE.items() if v != ""}
 
 # Create a numeric index for emojis to use in morse encoding
 
