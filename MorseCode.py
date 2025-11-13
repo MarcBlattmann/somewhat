@@ -133,8 +133,6 @@ EMOJI_TO_REFERENCE: Dict[str, str] = {
 REFERENCE_TO_EMOJI: Dict[str, str] = {v: k for k, v in EMOJI_TO_REFERENCE.items()}
 
 # Create a numeric index for emojis to use in morse encoding
-EMOJI_INDEX: Dict[str, int] = {emoji: idx for idx, emoji in enumerate(EMOJI_TO_REFERENCE.keys())}
-INDEX_TO_EMOJI: Dict[int, str] = {idx: emoji for emoji, idx in EMOJI_INDEX.items()}
 
 # --- mappings ---
 TEXT_TO_MORSE: Dict[str, str] = {
