@@ -78,7 +78,7 @@ EMOJI_TO_REFERENCE: Dict[str, str] = {
     "😗": "KISSING_FACE",
     "😋": "FACE_SAVORING_FOOD",
     "😌": "RELIEVED_FACE",
-    "": "SMIRKING_FACE",
+    "😏": "SMIRKING_FACE",
     "😒": "UNAMUSED_FACE",
     "😔": "PENSIVE_FACE",
     "😪": "SLEEPY_FACE",
