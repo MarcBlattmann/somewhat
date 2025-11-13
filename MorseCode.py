@@ -62,6 +62,80 @@ def copy_to_clipboard(text: str) -> bool:
         return True
     return False
 
+# --- emoji mappings ---
+EMOJI_TO_REFERENCE: Dict[str, str] = {
+    "😀": "GRINNING_FACE",
+    "😁": "BEAMING_FACE",
+    "😂": "FACE_WITH_TEARS_OF_JOY",
+    "😃": "GRINNING_FACE_WITH_BIG_EYES",
+    "😄": "GRINNING_FACE_WITH_SMILING_EYES",
+    "😅": "GRINNING_FACE_WITH_SWEAT",
+    "😆": "GRINNING_SQUINTING_FACE",
+    "😉": "WINKING_FACE",
+    "😊": "SMILING_FACE_WITH_SMILING_EYES",
+    "😍": "SMILING_FACE_WITH_HEART_EYES",
+    "😘": "FACE_BLOWING_A_KISS",
+    "😗": "KISSING_FACE",
+    "😋": "FACE_SAVORING_FOOD",
+    "😌": "RELIEVED_FACE",
+    "": "SMIRKING_FACE",
+    "😒": "UNAMUSED_FACE",
+    "😔": "PENSIVE_FACE",
+    "😪": "SLEEPY_FACE",
+    "😓": "DOWNCAST_FACE_WITH_SWEAT",
+    "😕": "CONFUSED_FACE",
+    "😲": "ASTONISHED_FACE",
+    "😞": "DISAPPOINTED_FACE",
+    "😖": "CONFOUNDED_FACE",
+    "😢": "CRYING_FACE",
+    "😭": "LOUDLY_CRYING_FACE",
+    "🤣": "ROLLING_ON_THE_FLOOR_LAUGHING",
+    "😳": "FLUSHED_FACE",
+    "😡": "POUTING_FACE",
+    "😠": "ANGRY_FACE",
+    "😤": "FACE_WITH_STEAM_FROM_NOSE",
+    "😨": "FEARFUL_FACE",
+    "😰": "ANXIOUS_FACE_WITH_SWEAT",
+    "😧": "ANGUISHED_FACE",
+    "😬": "GRIMACING_FACE",
+    "😐": "NEUTRAL_FACE",
+    "😑": "EXPRESSIONLESS_FACE",
+    "😮": "FACE_WITH_OPEN_MOUTH",
+    "❤️": "RED_HEART",
+    "💔": "BROKEN_HEART",
+    "💕": "TWO_HEARTS",
+    "💖": "SPARKLING_HEART",
+    "💗": "GROWING_HEART",
+    "💘": "CUPID",
+    "💚": "GREEN_HEART",
+    "💙": "BLUE_HEART",
+    "💜": "PURPLE_HEART",
+    "💛": "YELLOW_HEART",
+    "🎉": "PARTY_POPPER",
+    "🎊": "CONFETTI_BALL",
+    "🎈": "BALLOON",
+    "🎁": "WRAPPED_GIFT",
+    "⭐": "STAR",
+    "✨": "SPARKLES",
+    "🔥": "FIRE",
+    "👍": "THUMBS_UP",
+    "👎": "THUMBS_DOWN",
+    "👋": "WAVING_HAND",
+    "🙌": "RAISING_HANDS",
+    "🤝": "HANDSHAKE",
+    "🚀": "ROCKET",
+    "🌟": "GLOWING_STAR",
+    "☀️": "SUN",
+    "🌙": "MOON",
+    "⚡": "HIGH_VOLTAGE",
+    "💧": "WATER_DROPLET",
+}
+REFERENCE_TO_EMOJI: Dict[str, str] = {v: k for k, v in EMOJI_TO_REFERENCE.items()}
+
+# Create a numeric index for emojis to use in morse encoding
+EMOJI_INDEX: Dict[str, int] = {emoji: idx for idx, emoji in enumerate(EMOJI_TO_REFERENCE.keys())}
+INDEX_TO_EMOJI: Dict[int, str] = {idx: emoji for emoji, idx in EMOJI_INDEX.items()}
+
 # --- mappings ---
 TEXT_TO_MORSE: Dict[str, str] = {
     "A": ".-", "B": "-...", "C": "-.-.", "D": "-..", "E": ".", "F": "..-.",
@@ -87,9 +161,22 @@ def text_to_morse(s: str) -> str:
     out_words = []
     for word in s.strip().split():
         codes = []
-        for ch in word:
-            code = TEXT_TO_MORSE.get(ch.upper())
-            codes.append(code if code else f"[{ch}]")
+        i = 0
+        while i < len(word):
+            ch = word[i]
+            # Check if this is an emoji
+            if ch in EMOJI_TO_REFERENCE:
+                emoji_ref = EMOJI_TO_REFERENCE[ch]
+                # Convert reference text to morse
+                for ref_ch in emoji_ref:
+                    morse_code = TEXT_TO_MORSE.get(ref_ch.upper())
+                    if morse_code:
+                        codes.append(morse_code)
+                i += 1
+            else:
+                code = TEXT_TO_MORSE.get(ch.upper())
+                codes.append(code if code else f"[{ch}]")
+                i += 1
         out_words.append(" ".join(codes))
     return " / ".join(out_words)
 
@@ -99,8 +186,36 @@ def morse_to_text(s: str) -> str:
         raw_word = raw_word.strip()
         if not raw_word:
             continue
-        letters = [MORSE_TO_TEXT.get(token, "�") for token in raw_word.split()]
-        words.append("".join(letters))
+        
+        # First, decode all morse to text
+        tokens = raw_word.split()
+        decoded_chars = []
+        for token in tokens:
+            char = MORSE_TO_TEXT.get(token, "")
+            if char:
+                decoded_chars.append(char)
+        
+        decoded_text = "".join(decoded_chars)
+        
+        # Now check if parts of this text match emoji references and convert them back
+        result = []
+        i = 0
+        while i < len(decoded_text):
+            found_emoji = False
+            # Try to match emoji references from longest to shortest
+            for emoji_ref in sorted(REFERENCE_TO_EMOJI.keys(), key=len, reverse=True):
+                if decoded_text[i:i+len(emoji_ref)] == emoji_ref:
+                    emoji = REFERENCE_TO_EMOJI[emoji_ref]
+                    result.append(emoji)
+                    i += len(emoji_ref)
+                    found_emoji = True
+                    break
+            
+            if not found_emoji:
+                result.append(decoded_text[i])
+                i += 1
+        
+        words.append("".join(result))
     return " ".join(words)
 
 def main():
